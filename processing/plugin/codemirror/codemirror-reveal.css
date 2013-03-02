@@ -1,0 +1,12 @@
+.reveal .CodeMirror pre
+{
+	font-size: 100%;
+	box-shadow: none;
+}
+
+.reveal .CodeMirror
+{
+	line-height: 1.25;
+	font-size: 0.6em;
+	height: 600px;
+}

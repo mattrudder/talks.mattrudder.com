@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Generative Art - Visualizations with Processing</title>
+
+		<meta name="description" content="An introductory lesson in algorithmic art, powered by the Processing visualization language.">
+		<meta name="author" content="Matt Rudder">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/night.css" id="theme">
+		<link rel="stylesheet" href="plugin/codemirror/codemirror.css">
+		<link rel="stylesheet" href="plugin/codemirror/codemirror-reveal.css">
+		<link rel="stylesheet" href="plugin/codemirror/solarized.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<section>
+					<h1>Generative Art</h1>
+					<h3>Visualizations with Processing</h3>
+					<p>
+						<small>Created by <a href="http://mattrudder.com">Matt Rudder</a> / <a href="http://twitter.com/mattrudder">@mattrudder</a></small>
+					</p>
+				</section>
+
+				<section>
+					<section>
+						<h2>What is Generative Art?</h2>
+						<p>
+							According to Wikipedia...
+						</p>
+						<blockquote cite="http://en.wikipedia.org/wiki/Generative_art">
+							Generative art refers to art that in whole or in part has been created with the use of an autonomous system. 
+						</blockquote>
+
+						<aside class="notes">
+							Autonomous system: basically an algorithm.
+
+							"Generative Art" is often used to refer to computer generated artwork that is algorithmically determined.
+						</aside>
+					</section>
+					<section>
+						<h2>What is Processing?</h2>
+						<blockquote cite="http://processing.org">Processing is an open source programming language and environment for people who want to create images, animations, and interactions.</blockquote>
+
+						<aside class="notes">
+							Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the speaker notes window (hit 's' on your keyboard).
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Prettier, Editable Code</h2>
+					<textarea data-codemirror>
+/* 
+ PROCESSINGJS.COM HEADER ANIMATION  
+ MIT License - F1lT3R/Hyper-Metrix
+ Native Processing Compatible 
+ */
+
+// Set number of circles
+int count = 20;
+// Set maximum and minimum circle size
+int maxSize = 100;
+int minSize = 20;
+// Build float array to store circle properties
+float[][] e = new float[count][5];
+// Set size of dot in circle center
+float ds=2;
+// Set drag switch to false
+boolean dragging=false;
+// integers showing which circle (the first index in e) that's locked, and its position in relation to the mouse
+int lockedCircle; 
+int lockedOffsetX;
+int lockedOffsetY;
+// If user presses mouse...
+void mousePressed () {
+  // Look for a circle the mouse is in, then lock that circle to the mouse
+  // Loop through all circles to find which one is locked
+  for (int j=0;j< count;j++) {
+    // If the circles are close...
+    if (sq(e[j][0] - mouseX) + sq(e[j][1] - mouseY) < sq(e[j][2]/2)) {
+      // Store data showing that this circle is locked, and where in relation to the cursor it was
+      lockedCircle = j;
+      lockedOffsetX = mouseX - (int)e[j][0];
+      lockedOffsetY = mouseY - (int)e[j][1];
+      // Break out of the loop because we found our circle
+      dragging = true;
+      break;
+    }
+  }
+}
+// If user releases mouse...
+void mouseReleased() {
+  // ..user is no-longer dragging
+  dragging=false;
+}
+
+// Set up canvas
+void setup() {
+  // Frame rate
+  frameRate(60);
+  // Size of canvas (width,height)
+  size(940, 78);
+  // Stroke/line/border thickness
+  strokeWeight(1);
+  // Initiate array with random values for circles
+  for (int j=0;j< count;j++) {
+    e[j][0]=random(width); // X 
+    e[j][1]=random(height); // Y
+    e[j][2]=random(minSize, maxSize); // Radius        
+    e[j][3]=random(-.12, .12); // X Speed
+    e[j][4]=random(-.12, .12); // Y Speed
+  }
+}
+
+// Begin main draw loop (called 25 times per second)
+void draw() {
+  // Fill background black
+  background(0);
+  // Begin looping through circle array
+  for (int j=0;j< count;j++) {
+    // Disable shape stroke/border
+    noStroke();
+    // Cache diameter and radius of current circle
+    float radi=e[j][2];
+    float diam=radi/2;
+    if (sq(e[j][0] - mouseX) + sq(e[j][1] - mouseY) < sq(e[j][2]/2))
+      fill(64, 187, 128, 100); // green if mouseover
+    else
+      fill(64, 128, 187, 100); // regular
+    if ((lockedCircle == j && dragging)) {
+      // Move the particle's coordinates to the mouse's position, minus its original offset
+      e[j][0]=mouseX-lockedOffsetX;
+      e[j][1]=mouseY-lockedOffsetY;
+    }
+    // Draw circle
+    ellipse(e[j][0], e[j][1], radi, radi);
+    // Move circle
+    e[j][0]+=e[j][3];
+    e[j][1]+=e[j][4];
+
+
+    /* Wrap edges of canvas so circles leave the top
+     and re-enter the bottom, etc... */
+    if ( e[j][0] < -diam      ) { 
+      e[j][0] = width+diam;
+    } 
+    if ( e[j][0] > width+diam ) { 
+      e[j][0] = -diam;
+    }
+    if ( e[j][1] < 0-diam     ) { 
+      e[j][1] = height+diam;
+    }
+    if ( e[j][1] > height+diam) { 
+      e[j][1] = -diam;
+    }
+
+    // If current circle is selected...
+    if ((lockedCircle == j && dragging)) {
+      // Set fill color of center dot to white..
+      fill(255, 255, 255, 255);
+      // ..and set stroke color of line to green.
+      stroke(128, 255, 0, 100);
+    } 
+    else {            
+      // otherwise set center dot color to black.. 
+      fill(0, 0, 0, 255);
+      // and set line color to turquoise.
+      stroke(64, 128, 128, 255);
+    }
+
+    // Loop through all circles
+    for (int k=0;k< count;k++) {
+      // If the circles are close...
+      if ( sq(e[j][0] - e[k][0]) + sq(e[j][1] - e[k][1]) < sq(diam) ) {
+        // Stroke a line from current circle to adjacent circle
+        line(e[j][0], e[j][1], e[k][0], e[k][1]);
+      }
+    }
+    // Turn off stroke/border
+    noStroke();      
+    // Draw dot in center of circle
+    rect(e[j][0]-ds, e[j][1]-ds, ds*2, ds*2);
+  }
+}
+					</textarea>
+					<p>Courtesy of <a href="http://codemirror.net">CodeMirror</a>.</p>
+				</section>
+
+				<section>
+					<h1>THE END</h1>
+					<h3>Questions?</h3>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: false,
+				history: true,
+				center: true,
+
+				width: 1024,
+				height: 768,
+
+				theme: 'night', // available themes are in /css/theme
+				transition: 'concave', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/codemirror/codemirror.js', condition: function() { return !!document.querySelector( 'textarea[data-codemirror]' ); } },
+					{ src: 'plugin/codemirror/clike.js', condition: function() { return !!document.querySelector( 'textarea[data-codemirror]' ); } },
+					{ src: 'plugin/codemirror/codemirror-plugin.js', condition: function() { return !!document.querySelector( 'textarea[data-codemirror]' ); } },
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
