@@ -6,7 +6,15 @@ int delay = 16;
 
 void clear() {
   loadPixels();
-  for (int i = 0; i < width * height; i++) pixels[i] = 0;
+  for (int i = 0; i < width * height; i++) {
+    color argb = pixels[i];
+    int a = argb >> 24 & 0xFF;
+    int r = argb >> 16 & 0xFF;  // Faster way of getting red(argb)
+    int g = argb >> 8 & 0xFF;   // Faster way of getting green(argb)
+    int b = argb & 0xFF;        // Faster way of getting blue(argb)
+
+    pixels[i] = color(a / 2, r, g, b);
+  }
   updatePixels(); 
 }
 
@@ -26,12 +34,12 @@ void setup(){
 // Main draw loop
 void draw() {
   
-  radius = radius + sin( frameCount / 14 ) * 8;
-  strokeWeight( radius / 10 );
+  radius = radius + sin(frameCount / 14) * 8;
+  strokeWeight(radius / 10);
   
   // Track circle to new destination
-  X+=(nX-X)/delay;
-  Y+=(nY-Y)/delay;
+  X += (nX - X) / delay;
+  Y += (nY - Y) / delay;
   
   // Fill canvas grey
   clear();
